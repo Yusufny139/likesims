@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#f6ecdf" />
+    <meta name="description" content="Ferhanım & Yusuf Niyazi — Bizim Ev. 3B bir yaşam simülasyonu." />
+    <title>LikeSims — Ferhanım & Yusuf Niyazi: Bizim Ev</title>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene" aria-label="3B ev sahnesi"></canvas>
+
+      <!-- HUD -->
+      <header id="topbar" class="topbar hidden">
+        <div class="brand">
+          <span class="brand-gem"></span>
+          <div class="brand-text">
+            <strong>LikeSims</strong>
+            <span>Bizim Ev</span>
+          </div>
+        </div>
+
+        <div class="clock-pill" id="clockPill" title="Oyun saati">
+          <span id="dayIcon" aria-hidden="true">☀</span>
+          <div class="clock-copy">
+            <strong id="clockTime">09:00</strong>
+            <span id="clockDay">Gün 1</span>
+          </div>
+        </div>
+
+        <div class="speed-pill" id="speedPill" role="group" aria-label="Oyun hızı">
+          <button class="speed-btn speed-pause" data-speed="0" title="Duraklat (Boşluk)" aria-label="Duraklat">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="5" width="3.6" height="14" rx="1.8"/><rect x="13.4" y="5" width="3.6" height="14" rx="1.8"/></svg>
+          </button>
+          <button class="speed-btn active" data-speed="1" title="Normal hız (1)" aria-label="Normal hız">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5.6c0-1 1.1-1.7 2-1.2l9.2 5.6c.9.5.9 1.8 0 2.4L11 18.9c-.9.5-2-.1-2-1.2V5.6Z"/></svg>
+          </button>
+          <button class="speed-btn speed-double" data-speed="2" title="Hızlı (2)" aria-label="Hızlı">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.4 6.6 10.6 12l-6.2 5.4" fill="none" stroke="currentColor" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.6 6.6 18.8 12l-6.2 5.4" fill="none" stroke="currentColor" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="speed-btn speed-triple" data-speed="4" title="Çok hızlı (3)" aria-label="Çok hızlı">
+            <svg viewBox="0 0 28 24" aria-hidden="true"><path d="M3.4 7.4 8.6 12l-5.2 4.6" fill="none" stroke="currentColor" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.2 7.4 16.4 12l-5.2 4.6" fill="none" stroke="currentColor" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 7.4 24.2 12 19 16.6" fill="none" stroke="currentColor" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+
+        <div class="top-actions">
+          <div class="money-pill" id="moneyPill" title="Kasa">
+            <span>₺</span><strong id="moneyValue">750</strong>
+          </div>
+          <button class="icon-btn" id="soundBtn" title="Ses" aria-label="Sesi aç/kapat">🔊</button>
+          <button class="icon-btn" id="shopBtn" title="Dekorasyon" aria-label="Dekorasyon mağazası">🛍️</button>
+          <button class="icon-btn" id="goalsBtn" title="Görevler" aria-label="Görevler">🏆</button>
+          <button class="icon-btn" id="helpBtn" title="Nasıl oynanır?" aria-label="Yardım">?</button>
+        </div>
+      </header>
+
+      <!-- Seçili sim paneli -->
+      <aside id="simPanel" class="panel sim-panel hidden">
+        <div class="sim-panel-head">
+          <div class="avatar" id="simAvatar">F</div>
+          <div class="sim-identity">
+            <h2 id="simName">Ferhanım</h2>
+            <p id="simMood">Ruh hali: <strong>İyi</strong></p>
+            <div class="trait-row" id="simTraits"></div>
+          </div>
+        </div>
+        <div class="needs" id="needsList"></div>
+        <div class="sim-panel-foot">
+          <button class="ghost-btn" id="focusBtn">🎥 Odağa al</button>
+          <button class="ghost-btn" id="cancelBtn">✋ İptal et</button>
+        </div>
+      </aside>
+
+      <!-- İlişki paneli -->
+      <aside id="relPanel" class="panel rel-panel hidden">
+        <div class="rel-head">
+          <span class="mini-avatar ferhanim">F</span>
+          <span class="rel-heart">♥</span>
+          <span class="mini-avatar yusuf">Y</span>
+        </div>
+        <div class="rel-bars">
+          <div class="rel-row">
+            <span>Dostluk</span>
+            <div class="rel-track"><i id="friendshipBar" style="width:45%"></i></div>
+            <b id="friendshipValue">45</b>
+          </div>
+          <div class="rel-row romance">
+            <span>Aşk</span>
+            <div class="rel-track"><i id="romanceBar" style="width:28%"></i></div>
+            <b id="romanceValue">28</b>
+          </div>
+        </div>
+        <p class="rel-hint" id="relHint">Aşk büyüsün ✨</p>
+      </aside>
+
+      <!-- Eylem kuyruğu -->
+      <section id="queueWrap" class="queue-wrap hidden">
+        <div class="queue-title"><span id="queueOwner">Ferhanım</span> <small>ne yapıyor?</small></div>
+        <div id="queueList" class="queue-list"></div>
+      </section>
+
+      <!-- Alt ipucu -->
+      <footer id="hintBar" class="hint-bar hidden">
+        <span><b>Sol tık</b> sim / eşya seç</span>
+        <span><b>Sürükle</b> döndür</span>
+        <span><b>Tekerlek</b> yakınlaş</span>
+        <span><b>Boşluk</b> duraklat</span>
+        <span><b>Tab</b> sim değiştir</span>
+      </footer>
+
+      <!-- 3D etiketler buraya projekte edilir -->
+      <div id="worldOverlay" class="world-overlay"></div>
+
+      <!-- Bildirimler -->
+      <div id="toasts" class="toasts"></div>
+
+      <!-- Pasta menü -->
+      <div id="pieMenu" class="pie-menu hidden" role="menu" aria-label="Etkileşimler">
+        <div class="pie-center">
+          <span id="pieIcon">🛋️</span>
+          <strong id="pieTitle">Kanepe</strong>
+          <small id="pieSub">Bir eylem seç</small>
+          <button id="pieClose" class="pie-close" aria-label="Kapat">✕</button>
+        </div>
+        <div id="pieActions" class="pie-actions"></div>
+      </div>
+
+      <!-- Görev paneli -->
+      <aside id="goalsPanel" class="drawer hidden" aria-label="Görevler">
+        <div class="drawer-head">
+          <div>
+            <span class="eyebrow">Bizim hikâyemiz</span>
+            <h2>Görevler</h2>
+          </div>
+          <button class="icon-btn" id="goalsClose" aria-label="Kapat">✕</button>
+        </div>
+        <p class="drawer-intro">Küçük anlar biriktirin, ödülleri toplayın. Tamamlanan her görev kasaya para ekler.</p>
+        <div id="goalsList" class="goals-list"></div>
+        <div class="drawer-foot"><span id="goalProgress">0 / 7 tamamlandı</span></div>
+      </aside>
+
+      <!-- Dekorasyon mağazası -->
+      <aside id="shopPanel" class="drawer hidden" aria-label="Dekorasyon">
+        <div class="drawer-head">
+          <div>
+            <span class="eyebrow">Evimizi güzelleştir</span>
+            <h2>Dekorasyon</h2>
+          </div>
+          <button class="icon-btn" id="shopClose" aria-label="Kapat">✕</button>
+        </div>
+        <p class="drawer-intro">Bilgisayarda çalışıp para kazanın, evinize küçük dokunuşlar ekleyin.</p>
+        <div id="shopList" class="goals-list"></div>
+        <div class="drawer-foot"><span id="shopHint">Kasa: ₺750</span></div>
+      </aside>
+
+      <!-- Yardım -->
+      <aside id="helpPanel" class="drawer hidden" aria-label="Nasıl oynanır">
+        <div class="drawer-head">
+          <div>
+            <span class="eyebrow">Kullanma kılavuzu</span>
+            <h2>Nasıl oynanır?</h2>
+          </div>
+          <button class="icon-btn" id="helpClose" aria-label="Kapat">✕</button>
+        </div>
+        <div class="help-grid">
+          <div><b>1 · Seç</b><p>Bir simin üzerine tıklayın. Seçili simin ihtiyaçları sol altta görünür.</p></div>
+          <div><b>2 · Etkileşim</b><p>Eşyalara tıklayıp pasta menüden eylem seçin. Sıraya alınan eylemler üst üste eklenir.</p></div>
+          <div><b>3 · Çift olun</b><p>Seçili simle diğerine tıklayın: sohbet, sarılma, öpücük… Aşk puanı arttıkça yeni etkileşimler açılır.</p></div>
+          <div><b>4 · İhtiyaçlar</b><p>Açlık, enerji, tuvalet, hijyen, eğlence ve sosyal ihtiyaçlar zamanla azalır. Mutlu tutun!</p></div>
+          <div><b>5 · Serbest irade</b><p>Simler kendi kararlarını verir. İsterseniz sağ alttaki düğmeyle kapatın ve tamamen siz yönetin.</p></div>
+          <div><b>6 · Para kazanın</b><p>Bilgisayarda çalışarak para kazanın; 🛍️ mağazasından eve yeni dekorasyonlar alın.</p></div>
+        </div>
+        <button class="primary-btn" id="helpDone">Anladım</button>
+      </aside>
+
+      <!-- Başlangıç ekranı -->
+      <div id="startScreen" class="start-screen">
+        <div class="start-bg-scrim"></div>
+        <div class="start-inner">
+          <div class="start-copy">
+            <div class="start-kicker"><span class="brand-gem"></span> BİR YAŞAM SİMÜLASYONU</div>
+            <h1 class="logo">Like<span>Sims</span></h1>
+            <p class="start-title">Ferhanım <em>&</em> Yusuf Niyazi</p>
+            <p class="start-sub">Bizim Ev · 3B</p>
+            <p class="start-desc">
+              İki kalp, tek ev. Ferhanım ile Yusuf Niyazi'nin küçük dünyasında
+              ihtiyaçları karşılayın, birlikte vakit geçirin ve aşklarını büyütün.
+            </p>
+
+            <div class="start-sims">
+              <article class="start-sim-card ferhanim">
+                <div class="start-avatar">F</div>
+                <div>
+                  <h3>Ferhanım</h3>
+                  <p>Gurme · Neşeli · Düzenli</p>
+                  <span>“Yusuf, yine mi çorap dağınık?”</span>
+                </div>
+              </article>
+              <article class="start-sim-card yusuf">
+                <div class="start-avatar">Y</div>
+                <div>
+                  <h3>Yusuf Niyazi</h3>
+                  <p>Romantik · Espri sever · Tembel</p>
+                  <span>“Aşkım, filmi ben seçebilir miyim?”</span>
+                </div>
+              </article>
+            </div>
+
+            <div class="start-buttons">
+              <button class="primary-btn" id="startBtn">Evimize gir <span>→</span></button>
+              <button class="ghost-btn" id="startHelpBtn">Nasıl oynanır?</button>
+            </div>
+            <p class="start-foot">3B · Klavye + fare · Türkçe</p>
+          </div>
+
+          <div class="start-side">
+            <div class="start-badge">
+              <span class="badge-gem"></span>
+              <div><strong>7</strong><small>görev</small></div>
+            </div>
+            <div class="start-badge">
+              <span>🏠</span>
+              <div><strong>1</strong><small>sıcak yuva</small></div>
+            </div>
+            <div class="start-badge">
+              <span>♥</span>
+              <div><strong>∞</strong><small>aşk</small></div>
+            </div>
+            <div class="start-tip">
+              <b>İpucu</b>
+              <p>Simler açken kendi başlarına mutfağa koşar. Serbest iradeyi açık bırakın, keyfini sürün.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Duraklatma -->
+      <div id="pauseScreen" class="pause-screen hidden">
+        <div class="pause-card">
+          <span class="eyebrow">Mola zamanı</span>
+          <h2>Oyun duraklatıldı</h2>
+          <p>Ferhanım ve Yusuf Niyazi sizi bekliyor.</p>
+          <div class="pause-actions">
+            <button class="primary-btn" id="resumeBtn">Devam et</button>
+            <button class="ghost-btn" id="pauseHelpBtn">Nasıl oynanır?</button>
+          </div>
+          <div class="pause-options">
+            <label class="switch-row">
+              <span>Serbest irade</span>
+              <input type="checkbox" id="freeWillToggle2" checked />
+              <i></i>
+            </label>
+            <label class="switch-row">
+              <span>Ses</span>
+              <input type="checkbox" id="soundToggle2" checked />
+              <i></i>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div id="loading" class="loading">
+        <span class="loading-gem"></span>
+        <p>Ev hazırlanıyor…</p>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
